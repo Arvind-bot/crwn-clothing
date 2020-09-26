@@ -13,6 +13,31 @@ const config = {
   measurementId: "G-P2PX19JMTP",
 };
 
+export const createUserProfileDocument= async (userAuth, additionalData)=>{
+  if(!userAuth)return;
+  // console.log(userAuth);
+  const userRef=firestore.doc(`users/${userAuth.uid}`);
+  // console.log(userRef);
+  const snapShot=await userRef.get();
+  // console.log(snapShot);
+
+  if(!snapShot.exists){
+    const {displayName, email}=userAuth;
+    const createdAt=new Date();
+    try{
+      await userRef.set({
+        displayName,
+        email,
+        createdAt,
+        ...additionalData
+      })
+    }catch(error){
+      console.log("error creating user",error.message);
+    }
+  }
+  return userRef;
+}
+
 firebase.initializeApp(config);
 
 export const auth = firebase.auth();
@@ -22,6 +47,6 @@ const provider =new firebase.auth.GoogleAuthProvider();
 
 provider.setCustomParameters({prompt:"select_account"});
 
-export const signInWithGoole=()=>auth.signInWithPopup(provider);
+export const signInWithGoogle=()=>auth.signInWithPopup(provider);
 
 export default firebase;
